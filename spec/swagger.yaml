@@ -63,6 +63,33 @@ info:
   x-logo:
     url: 'https://ducatus.github.io/ducatus-payment-api/DUCATUS%20MASTER_FULL%20COLOUR_TRANSPARENT_21NOV17_CoachBongster.png'
 
+tags:
+  - name: API Key
+    description: |
+      API Key generation
+      
+      ## How To Get The Extended Public Key
+      In order to get the `ex_pub_key` value, inside your Ducatus Wallet application go to:
+      
+      `settings` &rarr; (under DucatusCoin Wallets) `[Wallet Name]` &rarr; `More Options` &rarr; `Wallet Information` &rarr; `Copayer 0`
+      
+      
+      <div class="alert alert-danger" role="alert"><i class="fa fa-info-circle"></i> <b>Note: </b>It's important to use a completely new wallet, there is no guarantee that this system will work on wallet that is being used. Never send any funds into this wallet without doing a payment request first. There is no issues transferring funds out of the wallet</div>
+        
+          
+  - name: Payment Request
+    description: |
+      Payment Request Operations
+      
+      
+# Security scheme definitions that can be used across the specification.
+securityDefinitions:
+  basic_auth: # security definition name (you can name it as you want)
+    type: basic
+    description: Currently this gateway is not public nor live. Therefore, the gateway currently requires HTTP Basic Auth to access.
+
+security:
+  - basic_auth: []
 produces:
   # List of mime types your API endpoins can return.
   # This is a global default. You can OVERWRITE it in each specific operation.
@@ -76,14 +103,7 @@ consumes:
   - application/json
   # you can add any mime type your API consumes to the list
 
-# Security scheme definitions that can be used across the specification.
-securityDefinitions:
-  basic_auth: # security definition name (you can name it as you want)
-    type: basic
-    description: Currently this gateway is not public nor live. Therefore, the gateway currently requires HTTP Basic Auth to access.
 
-security:
-  - basic_auth: []
 
 # Holds the relative paths to the individual endpoints. The path is appended to the
 # basePath in order to construct the full URL. 
@@ -92,6 +112,8 @@ paths:
     post:
       summary: Generate API key
       description: Returns an API key
+      tags:
+       - API Key
       consumes:
         - application/json
       parameters:
@@ -133,6 +155,8 @@ paths:
   /request_payment/{id}:
     get:
       summary: Get info on a past payment request
+      tags:
+        - Payment Request
       parameters:
         - name: id
           in: path
@@ -150,6 +174,8 @@ paths:
     post:
       summary: Payment Request
       description: Create a new request for payment, returns data for payment request
+      tags:
+        - Payment Request
       consumes:
         - application/json
       parameters:
@@ -190,21 +216,17 @@ definitions:
         type: string
         description: A unique crypto address
         example: Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM
-      qr_data:
+      payment_data:
         type: string
-        description: A URL to the QR code
+        description: Payment data to be encoded in a QR code or opened by a wallet
         example: ducatuscoin:Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM?amount=4.601
       expected:
         type: string
         description: expected amount to be paid in the crypto (DTC or BTC)
         example: "4.601"
-      balance:
+      actual_paid:
         type: string
         description: Actual amount paid in BTC or DTC
-        default: "0"
-      unconfirmed:
-        type: string
-        description: Amount awaiting to be confirmed in the blockchain
         default: "0"
       expiresAt:
         type: number
@@ -242,4 +264,39 @@ definitions:
           - livenet
           - testnet
         default: livenet
+  PaymentInfo:
+    type: object
+    properties:
+      txs:
+        type: object
+        properties:
+          pagesTotal:
+            type: number
+            description: number of pages of transactions
+          txs:
+            type: string
+            description: Place holdre for now
+      balance:
+        type: object
+        properties:
+          address:
+            type: string
+            example: Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM
+            description: Payment address
+          in:
+            type: number
+            description: Amount that was sent to the payment address
+          out:
+            type: number
+            description: Amount that has left the payment address
+          curr:
+            type: string
+            description: Currency that amount is in
+          balance:
+            type: number
+            description: Balance of the address
+          txs:
+            type: number
+            description: Number of transactions associated with this address
+        
 
