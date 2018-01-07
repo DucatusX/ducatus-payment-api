@@ -1,0 +1,261 @@
+swagger: '2.0'
+schemes:
+  - http
+  - https
+host: payment.ducatus.io
+basePath: /
+info:
+  description: |
+    This is a RESTful DucatusCoin payment gateway that allows users to quickly and easily integrate DucatusCoin as a payment method. Currently the payment gateway accepts payment requests for DucatusCoin as well as Bitcoin.  
+
+    # Introduction
+    This specification is intended to describe the functionality and use of the payment gateway. The gateway provides an easy way to receive DucatusCoin as a payment method. There are no fees associated with this service, and no registration is needed. Simply create an API key and point the Instant Payment Notification (IPN) parameter to an endpoint of your choosing.
+
+    # Instant Payment Notification
+    When a payment is received by a payment request, a payment notification is sent to a URL that was set when generating the API key. The notification will be a POST containing all the pertinant information of a payment: 
+
+    ```json
+    {
+      "id": "NWHruNZITo11Cjyz",
+      "address": "Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM",
+      "qr_data": "ducatuscoin:Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM?amount=4.601",
+      "expected": "4.601",
+      "balance": "4.601",
+      "unconfirmed": "0",
+      "expiresAt": 1515155937620,
+      "api_data": {
+        "api_key": "uNZINWHrTo11Cjyz",
+        "ex_pub_key": "Ltub2ZpAmhCdTqeogbBEzzbnme3sixN8sTySiTnqVq1RGZGfCboegMY7mes1CYXgSpzAQTJC2haJ2YTiaQcJNueoP6jVLAPHJJJ82DxERWeFnc5",
+        "crypto_symbol": "dtc",
+        "ipn": "https://exmple.com/payment-notification-post-endpoint",
+        "network": "livenet"
+      }
+    }
+    ```
+
+    This is described in more detail under the payment request, as the data received back from that API call is the same as the data that gets sent to the IPN.
+
+    # Development Process and Contribution
+    Changes in the specification are made in the upcoming version branch. A merge request is then placed to the development branch, where it get's approved. Once in the development branch, the changes are then implemented in the backend project, when fully implemented the API specification is moved to the master branch.
+
+    # Testing
+    This specification is tested through the use of [Dredd](http://dredd.readthedocs.io/en/latest) to ensure that documentation is up-to-date as well as [Artillery](https://artillery.io/) for load testing.
+  version: 0.0.1
+  title: payment.ducatus.io DRAFT
+  contact:
+    name: Ducatus Tech Support
+    email: tech@ducatus.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  x-logo:
+    url: 'https://ducatus.github.io/ducatus-payment-api/DUCATUS%20MASTER_FULL%20COLOUR_TRANSPARENT_21NOV17_CoachBongster.png'
+tags:
+  - name: API Key
+    description: |
+      API Key generation
+
+      ## How To Get The Extended Public Key
+      In order to get the `ex_pub_key` value, inside your Ducatus Wallet application go to:
+
+      `settings` &rarr; (under DucatusCoin Wallets) `[Wallet Name]` &rarr; `More Options` &rarr; `Wallet Information` &rarr; `Copayer 0`
+
+
+      <div class="alert alert-danger" role="alert"><i class="fa fa-info-circle"></i> <b>Note: </b>It's important to use a completely new wallet, there is no guarantee that this system will work on wallet that is being used. Never send any funds into this wallet without doing a payment request first. There is no issues transferring funds out of the wallet</div>
+        
+          
+  - name: Payment Request
+    description: |
+      Payment Request Operations
+securityDefinitions:
+  basic_auth:
+    type: basic
+    description: 'Currently this gateway is not public nor live. Therefore, the gateway currently requires HTTP Basic Auth to access.'
+security:
+  - basic_auth: []
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /api_key:
+    post:
+      summary: Generate API key
+      description: Returns an API key
+      tags:
+        - API Key
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: data
+          description: Payment Request data
+          required: true
+          schema:
+            type: object
+            properties:
+              ex_pub_key:
+                type: string
+                description: External Public Key of the wallet
+                example: Ltub2ZpAmhCdTqeogbBEzzbnme3sixN8sTySiTnqVq1RGZGfCboegMY7mes1CYXgSpzAQTJC2haJ2YTiaQcJNueoP6jVLAPHJJJ82DxERWeFnc5
+              ipn:
+                type: string
+                description: Instant payment URL that the payment gateway will send a post to
+                example: 'https://exmple.com/payment-notification-post-endpoint'
+              crypto_symbol:
+                type: string
+                enum:
+                  - btc
+                  - dtc
+                description: 'The ticker for the crypto, only BTC and DTC is supported (case insensitive)'
+                example: dtc
+              network:
+                type: string
+                description: Testnet or Livenet
+                enum:
+                  - livenet
+                  - testnet
+                default: livenet
+      responses:
+        '200':
+          description: A User object
+          schema:
+            $ref: '#/definitions/ApiData'
+  '/request_payment/{id}':
+    get:
+      summary: Get info on a past payment request
+      tags:
+        - Payment Request
+      parameters:
+        - name: id
+          in: path
+          description: The ID of that was returned for the payment request
+          required: true
+          type: string
+          example: NWHruNZITo11Cjyz
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PaymentRequest'
+  /request_payment:
+    post:
+      summary: Payment Request
+      description: 'Create a new request for payment, returns data for payment request'
+      tags:
+        - Payment Request
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: data
+          description: Payment Request data
+          required: true
+          schema:
+            type: object
+            properties:
+              expected:
+                type: string
+                description: Expected crypto amount to be paid
+              api_key:
+                type: string
+                description: API key
+                example: uNZINWHrTo11Cjyz
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PaymentRequest'
+definitions:
+  PaymentRequest:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 'ID of the transaction from the payment gateway, not blockchain ID'
+        example: NWHruNZITo11Cjyz
+      address:
+        type: string
+        description: A unique crypto address
+        example: Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM
+      payment_data:
+        type: string
+        description: Payment data to be encoded in a QR code or opened by a wallet
+        example: 'ducatuscoin:Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM?amount=4.601'
+      expected:
+        type: string
+        description: expected amount to be paid in the crypto (DTC or BTC)
+        example: '4.601'
+      actual_paid:
+        type: string
+        description: Actual amount paid in BTC or DTC
+        default: '0'
+      expiresAt:
+        type: number
+        description: Time in epoch with miliseconds that the address will expire
+        example: 1515155937620
+      api_data:
+        $ref: '#/definitions/ApiData'
+  ApiData:
+    type: object
+    properties:
+      api_key:
+        type: string
+        description: An API key
+        example: uNZINWHrTo11Cjyz
+      ex_pub_key:
+        type: string
+        description: Extended public key
+        example: Ltub2ZpAmhCdTqeogbBEzzbnme3sixN8sTySiTnqVq1RGZGfCboegMY7mes1CYXgSpzAQTJC2haJ2YTiaQcJNueoP6jVLAPHJJJ82DxERWeFnc5
+      crypto_symbol:
+        type: string
+        enum:
+          - btc
+          - dtc
+        example: dtc
+        description: 'The ticker for the crypto, only BTC and DTC is supported (case insensitive)'
+      ipn:
+        type: string
+        description: An endpoint that can accept a POST with JSON data
+        example: 'https://exmple.com/payment-notification-post-endpoint'
+      network:
+        type: string
+        description: Testnet or Livenet
+        enum:
+          - livenet
+          - testnet
+        default: livenet
+  PaymentInfo:
+    type: object
+    properties:
+      txs:
+        type: object
+        properties:
+          pagesTotal:
+            type: number
+            description: number of pages of transactions
+          txs:
+            type: string
+            description: Place holdre for now
+      balance:
+        type: object
+        properties:
+          address:
+            type: string
+            example: Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM
+            description: Payment address
+          in:
+            type: number
+            description: Amount that was sent to the payment address
+          out:
+            type: number
+            description: Amount that has left the payment address
+          curr:
+            type: string
+            description: Currency that amount is in
+          balance:
+            type: number
+            description: Balance of the address
+          txs:
+            type: number
+            description: Number of transactions associated with this address
