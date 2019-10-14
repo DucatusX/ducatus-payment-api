@@ -32,7 +32,7 @@ info:
       "api_data": {
         "api_key": "uNZINWHrTo11Cjyz",
         "ex_pub_key": "Ltub2ZpAmhCdTqeogbBEzzbnme3sixN8sTySiTnqVq1RGZGfCboegMY7mes1CYXgSpzAQTJC2haJ2YTiaQcJNueoP6jVLAPHJJJ82DxERWeFnc5",
-        "crypto_symbol": "dtc",
+        "crypto_symbol": "duc",
         "ipn": "https://exmple.com/payment-notification-post-endpoint",
         "network": "livenet"
       }
@@ -137,8 +137,8 @@ paths:
                 enum:
                   - btc
                   - dtc
-                description: The ticker for the crypto, only BTC and DTC is supported (case insensitive)
-                example: dtc
+                description: The ticker for the crypto, only BTC and DUC is supported (case insensitive)
+                example: duc
               network:
                 type: string
                 description: Testnet or Livenet
@@ -222,11 +222,11 @@ definitions:
         example: ducatuscoin:Ln4E73gikptjT9cBDAQcXG29vVxH5TB9GM?amount=4.601
       expected:
         type: string
-        description: expected amount to be paid in the crypto (DTC or BTC)
+        description: expected amount to be paid in the crypto (DUC or BTC)
         example: "4.601"
       actual_paid:
         type: string
-        description: Actual amount paid in BTC or DTC
+        description: Actual amount paid in BTC or DUC
         default: "0"
       expiresAt:
         type: number
@@ -250,9 +250,9 @@ definitions:
         type: string
         enum:
           - btc
-          - dtc
-        example: dtc
-        description: The ticker for the crypto, only BTC and DTC is supported (case insensitive)
+          - duc
+        example: duc
+        description: The ticker for the crypto, only BTC and DUC is supported (case insensitive)
       ipn:
         type: string
         description: An endpoint that can accept a POST with JSON data
